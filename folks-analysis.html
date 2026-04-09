@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ListingCore</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#04080f;--bg2:#08101e;--bg3:#0e1a2c;--bg4:#060d1a;
+  --border:#132030;--border2:#1c3048;--bg-grad:#0b1828;
+  --txt:#d8e8f8;--txt2:#7fa0be;--txt3:#435d78;--txt4:#2c4260;
+  --accent:#6757e8;--accent2:#8878f8;--gold:#d98c00;--gold2:#f0a824;
+  --green:#00bc8c;--green2:#26d49a;--red:#e03c3c;--red2:#f06868;
+  --cyan:#12c0dc;--purple:#9248d8;
+}
+[data-theme=light]{
+  --bg:#f2f5fa;--bg2:#ffffff;--bg3:#e8eef8;--bg4:#f7f9fd;
+  --border:#d4dff0;--border2:#b8cce0;--bg-grad:#eaf1ff;
+  --txt:#0b1422;--txt2:#1e3a58;--txt3:#456080;--txt4:#7898b8;
+  --accent:#4c40d0;--accent2:#6252e8;--gold:#b87200;--gold2:#cc8500;
+  --green:#008860;--green2:#00a876;--red:#c02020;--red2:#da3535;
+  --cyan:#0070a0;--purple:#5820b8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{display:flex;flex-direction:column;background:var(--bg);color:var(--txt);font:12px/1.4 'Inter',system-ui,sans-serif}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* NAV */
+nav{height:46px;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:10px;padding:0 18px;flex-shrink:0;z-index:100;
+    background:var(--bg2)}
+.logo{font-weight:800;font-size:14px;white-space:nowrap;color:var(--txt);letter-spacing:-.4px;display:flex;align-items:center;gap:6px}
+.logo-v{font-weight:500;font-size:9px;color:var(--txt3);letter-spacing:.5px;padding:1px 5px;border:1px solid var(--border);border-radius:3px}
+[data-theme=light] nav{background:#fff;border-bottom-color:var(--border)}
+[data-theme=light] .tabbar{background:#fff;border-bottom-color:var(--border)}
+[data-theme=light] .nbtn{background:#f2f5fa;border-color:var(--border2);color:var(--txt2)}
+[data-theme=light] .nbtn:hover{background:#e8eef8;border-color:var(--accent);color:var(--accent)}
+[data-theme=light] .srch-inp{background:#f7f9fd;border-color:var(--border2);color:var(--txt)}
+[data-theme=light] .dd{background:#fff;border-color:var(--border2);box-shadow:0 16px 40px #0b142230}
+[data-theme=light] .dd-row:hover{background:var(--bg3)}
+[data-theme=light] .tf{background:#f7f9fd;border-color:var(--border2);color:var(--txt)}
+.nsep{width:1px;height:22px;background:var(--border)}
+.tok-badge{background:var(--bg3);border:1px solid var(--border2);
+           color:var(--txt);font-weight:700;font-size:11px;padding:3px 10px;border-radius:5px;
+           white-space:nowrap;letter-spacing:.2px;
+           cursor:pointer;user-select:none;transition:all .15s}
+.tok-badge:hover{border-color:var(--accent)}
+[data-theme=light] .tok-badge{background:var(--bg3);border-color:var(--border2);color:var(--txt)}
+[data-theme=light] .cbadge.b-top{background:#00886010;border-color:#00886038;color:var(--green2)}
+[data-theme=light] .cbadge.b-mid{background:#b8720010;border-color:#b8720038;color:var(--gold2)}
+[data-theme=light] .cbadge.b-low{background:#c0202010;border-color:#c0202038;color:var(--red2)}
+[data-theme=light] .tbox{border-color:var(--border)}
+[data-theme=light] tbody tr:nth-child(even){background:#f7f9fd}
+[data-theme=light] tbody tr:hover{background:#4c40d008}
+[data-theme=light] tbody tr.hl{background:#b872000a;border-left-color:var(--gold2)}
+[data-theme=light] thead th{background:#fff}
+[data-theme=light] thead th{background:#fff}
+[data-theme=light] thead th:nth-child(1),[data-theme=light] thead th:nth-child(2){background:#fff}
+[data-theme=light] td:nth-child(1),[data-theme=light] td:nth-child(2){background:#fff}
+[data-theme=light] tr:nth-child(even) td:nth-child(1),[data-theme=light] tr:nth-child(even) td:nth-child(2){background:#f7f9fd}
+[data-theme=light] tr:hover td:nth-child(1),[data-theme=light] tr:hover td:nth-child(2){background:#e8eef8}
+[data-theme=light] tr.hl td:nth-child(1),[data-theme=light] tr.hl td:nth-child(2){background:#fdf7ec}
+[data-theme=light] .chcard{box-shadow:0 1px 8px #0b142210}
+[data-theme=light] .card{box-shadow:0 2px 12px #0b142210}
+[data-theme=light] .p25p{box-shadow:0 1px 8px #0b142208}
+.srch-wrap{position:relative}
+.srch-inp{background:var(--bg3);border:1px solid var(--border);border-radius:7px;
+          padding:5px 12px;color:var(--txt);font-size:12px;width:200px;outline:none;
+          transition:all .2s}
+.srch-inp:focus{border-color:var(--accent);box-shadow:0 0 0 2px #7c6af720}
+.dd{position:absolute;top:calc(100%+5px);left:0;width:290px;max-height:340px;
+    overflow-y:auto;background:var(--bg2);border:1px solid var(--border2);
+    border-radius:10px;box-shadow:0 16px 40px #00000070;z-index:300;display:none}
+.dd.open{display:block}
+.dd-sec{padding:6px 12px 3px;font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.dd-row{padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bg3);transition:background .12s}
+.dd-row:hover{background:var(--bg3)}
+.dd-row img{width:18px;height:18px;border-radius:50%;flex-shrink:0}
+.dd-sym{font-weight:700;font-size:12px}
+.dd-name{font-size:10px;color:var(--txt3)}
+.dd-tag{font-size:9px;padding:2px 6px;border-radius:4px;margin-left:auto;flex-shrink:0;font-weight:600;letter-spacing:.3px}
+.tag-a{background:#7c6af720;color:var(--accent2);border:1px solid #7c6af730}
+.tag-p{background:#22d3ee18;color:var(--cyan);border:1px solid #22d3ee30}
+.nav-price-wrap{display:flex;align-items:center;gap:6px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s ease-in-out infinite}
+.live-dot.off{background:var(--txt4);animation:none}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 var(--green)}50%{opacity:.7;box-shadow:0 0 0 4px transparent}}
+.nprice{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.nchg{font-size:11px;padding:2px 7px;border-radius:5px;font-weight:600}
+.up{color:var(--green);background:#00d4a118}.dn{color:var(--red);background:#f0505018}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.nbtn{background:var(--bg3);border:1px solid var(--border2);color:var(--txt2);
+      padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:all .15s}
+.nbtn:hover{border-color:var(--accent);color:var(--accent2);box-shadow:0 0 10px #7c6af720}
+
+/* TABS */
+.tabbar{height:34px;background:var(--bg2);border-bottom:1px solid var(--border);
+        display:flex;padding:0 18px;flex-shrink:0}
+.tab{padding:0 18px;cursor:pointer;font-size:12px;font-weight:600;color:var(--txt3);
+     border-bottom:2px solid transparent;display:flex;align-items:center;gap:5px;transition:all .15s}
+.tab:hover{color:var(--txt2)}
+.tab.on{color:var(--txt);border-bottom-color:var(--accent2)}
+
+/* PAGES */
+.pg{display:none;overflow-y:auto;height:calc(100vh - 82px)}
+.pg.on{display:block}
+
+/* STATS AREA */
+.sa{padding:4px 16px 2px}
+
+/* CARDS */
+.cards{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+      padding:7px 12px;flex:1;min-width:130px;position:relative;overflow:hidden;
+      transition:border-color .25s,box-shadow .25s}
+.card:hover{border-color:var(--border2)}
+.clbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;font-weight:600}
+.cval{font-size:17px;font-weight:800;margin-bottom:2px;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.csub{font-size:10px;color:var(--txt4);margin-bottom:2px}
+.cbar{background:var(--bg3);border-radius:100px;height:2px;overflow:hidden;margin-bottom:2px}
+.cbar-f{height:2px;border-radius:100px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.cbadge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;display:inline-block;letter-spacing:.3px}
+.b-top{background:transparent;color:var(--green2);border:1px solid var(--green2);opacity:.9}
+.b-mid{background:transparent;color:var(--gold2);border:1px solid var(--gold2);opacity:.9}
+.b-low{background:transparent;color:var(--red2);border:1px solid var(--red2);opacity:.9}
+
+/* P25 PANEL */
+.p25p{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:6px 16px;margin-bottom:4px}
+.p25-hd{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--txt2);margin-bottom:8px}
+/* Unified column template used by BOTH the header div and data rows */
+.p25-cols{display:grid;grid-template-columns:70px 1fr 84px 76px 100px;gap:8px;align-items:center}
+.p25-row{height:34px;border-bottom:1px solid var(--bg3)}
+.p25-row:last-child{border-bottom:none}
+.p25-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;font-weight:700;letter-spacing:.5px}
+.p25-track{position:relative;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.p25-fill-a{position:absolute;top:0;height:100%;background:var(--green2);opacity:.28;border-radius:4px}
+.p25-fill-b{position:absolute;top:0;height:100%;background:var(--red2);opacity:.28;border-radius:4px}
+.p25-line{position:absolute;top:0;bottom:0;width:1px;background:var(--txt3);transform:translateX(-50%)}
+.p25-track{cursor:help}
+.p25-dot{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid var(--bg2);z-index:2;cursor:help}
+.p25-tv{font-size:11px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.p25-rnk{font-size:9px;font-weight:600;color:var(--txt3);margin-top:3px;letter-spacing:.2px;font-variant-numeric:tabular-nums}
+.p25-pv{font-size:10px;color:var(--txt4);text-align:right;white-space:nowrap}
+.p25-dv{font-size:10px;font-weight:700;text-align:right;white-space:nowrap}
+.above{color:var(--green2)}.below{color:var(--red2)}
+
+/* INTELLIGENCE CARD */
+.ins{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);
+     border-radius:8px;padding:14px 18px;margin:0 auto 6px;width:100%}
+[data-theme=light] .ins{background:#fff}
+.ins-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ins-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3)}
+.ins-rank{font-size:15px;font-weight:800;color:var(--txt);font-variant-numeric:tabular-nums}
+.ins-pct{font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;margin-left:auto}
+.ins-pct-high{color:var(--green);background:#00bc8c10;border:1px solid #00bc8c30}
+.ins-pct-mid{color:var(--gold2);background:#d98c0010;border:1px solid #d98c0030}
+.ins-pct-low{color:var(--red2);background:#e03c3c10;border:1px solid #e03c3c30}
+.ins-summary{font-size:11px;color:var(--txt2);margin-bottom:10px;line-height:1.5}
+.ins-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-bottom:12px;
+          border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.ins-grid-6{grid-template-columns:repeat(6,1fr)}
+.ins-stat{padding:8px 10px;border-right:1px solid var(--border);text-align:center}
+.ins-stat:last-child{border-right:none}
+.ins-stat-label{font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--txt4);margin-bottom:3px}
+.ins-stat-val{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.ins-stat-val.high{color:var(--green)}.ins-stat-val.mid{color:var(--txt)}.ins-stat-val.low{color:var(--red2)}
+[data-theme=light] .ins-grid{border-color:var(--border)}
+.ins-footnote{font-size:8px;color:var(--txt4);margin-top:8px;text-align:center;letter-spacing:.2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+      padding:5px 10px;text-align:center;flex:1;min-width:70px}
+.chip-v{font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;letter-spacing:-.2px}
+.chip-l{font-size:7px;color:var(--txt4);margin-top:1px;letter-spacing:.4px;font-weight:600;text-transform:uppercase}
+
+/* CHARTS */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.chcard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;overflow:hidden}
+.ch-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;font-weight:700}
+.ch-wrap{position:relative;height:150px;overflow:hidden}
+.charts-2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px}
+
+/* TABLE AREA */
+.ta{padding:0 18px 12px}
+.tbox{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.tbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;
+      border-bottom:1px solid var(--border);background:var(--bg2)}
+.ttl{font-size:11px;font-weight:700;color:var(--txt2);letter-spacing:.2px}
+.tf{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;
+    color:var(--txt);font-size:11px;width:155px;outline:none;transition:all .2s}
+.tf:focus{border-color:var(--accent);box-shadow:0 0 0 2px #7c6af720}
+.tscroll{overflow-y:auto;overflow-x:auto;max-height:450px}
+table{border-collapse:collapse;width:100%}
+thead th{position:sticky;top:0;background:var(--bg2);padding:6px 10px;text-align:right;
+         font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.3px;
+         cursor:pointer;white-space:nowrap;border-bottom:2px solid var(--border);
+         user-select:none;font-weight:600;transition:color .15s;z-index:2}
+thead th:nth-child(1),thead th:nth-child(2){text-align:left;cursor:default}
+thead th:nth-child(1){position:sticky;left:0;z-index:3;background:var(--bg2);width:30px}
+thead th:nth-child(2){position:sticky;left:30px;z-index:3;background:var(--bg2)}
+thead th:hover:not(:nth-child(1)):not(:nth-child(2)){color:var(--txt)}
+thead th.srt{color:var(--accent2)}
+thead th.srt::after{content:' ▾'}
+thead th.srt.asc::after{content:' ▴'}
+tbody tr{border-bottom:1px solid var(--bg3);transition:background .1s}
+tbody tr:nth-child(even){background:var(--bg4)}
+tbody tr:hover{background:var(--bg3)}
+tbody tr.hl{background:#d98c0008;border-left:2px solid var(--gold2)}
+td{padding:5px 10px;text-align:right;white-space:nowrap;font-size:11px;vertical-align:middle;font-variant-numeric:tabular-nums}
+td:nth-child(1){text-align:center;color:var(--txt4);font-size:9px;width:30px;font-weight:600;position:sticky;left:0;background:inherit;z-index:1}
+td:nth-child(2){text-align:left;position:sticky;left:30px;background:inherit;z-index:1}
+.sc{display:flex;align-items:center;gap:6px}
+.sc img{width:16px;height:16px;border-radius:50%;flex-shrink:0}
+.sn{font-weight:700;font-size:11px}
+.sf{display:none}
+.g{color:var(--green)}.r{color:var(--red2)}.na{color:var(--txt4);font-size:10px}
+.rku{color:var(--green);font-size:10px;font-weight:700}.rkd{color:var(--red2);font-size:10px;font-weight:700}.rkn{color:var(--txt4);font-size:10px}
+.basis-pos{color:var(--green);font-size:10px;font-weight:700}
+.basis-neg{color:var(--red2);font-size:10px;font-weight:700}
+.basis-neu{color:var(--txt4);font-size:10px}
+
+/* ALERTS */
+.alert-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--txt2);
+  padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;transition:all .15s}
+.alert-btn:hover{border-color:var(--accent);color:var(--accent2)}
+.alert-count{font-size:8px;background:var(--accent);color:#fff;border-radius:50%;
+  width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;font-weight:700}
+.modal-bg{position:fixed;inset:0;background:#00000060;z-index:500;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  width:480px;max-width:92vw;max-height:80vh;overflow-y:auto;padding:20px}
+.modal h3{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--txt)}
+.modal label{font-size:10px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px;margin-top:10px}
+.modal input,.modal select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+  padding:6px 10px;color:var(--txt);font-size:11px;outline:none}
+.modal input:focus,.modal select:focus{border-color:var(--accent)}
+.modal-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:6px}
+.modal-row.tg-row{grid-template-columns:1fr auto;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.modal-actions{display:flex;gap:8px;margin-top:14px}
+.mbtn{padding:6px 16px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);transition:all .15s}
+.mbtn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mbtn-primary:hover{opacity:.9}
+.mbtn-ghost{background:transparent;color:var(--txt3)}
+.mbtn-ghost:hover{color:var(--txt)}
+.mbtn-danger{background:transparent;color:var(--red2);border-color:var(--red2)}
+.mbtn-danger:hover{background:var(--red2);color:#fff}
+.alert-list{margin-top:10px}
+.alert-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg3);font-size:11px}
+.alert-item:last-child{border-bottom:none}
+.alert-rule{color:var(--txt2)}.alert-tgt{color:var(--txt4);font-size:10px}
+.tg-status{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:600}
+.tg-on{color:var(--green);background:#00bc8c12;border:1px solid #00bc8c30}
+.tg-off{color:var(--txt4);background:var(--bg3);border:1px solid var(--border)}
+[data-theme=light] .modal{background:#fff;border-color:var(--border)}
+[data-theme=light] .modal input,[data-theme=light] .modal select{background:#f7f9fd;border-color:var(--border2)}
+
+/* MISC */
+.spin{display:flex;align-items:center;justify-content:center;height:140px;color:var(--txt3);gap:10px;font-size:12px;font-weight:500}
+.spinner{width:16px;height:16px;border:2px solid var(--bg3);border-top-color:var(--accent2);
+         border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.errbox{background:#f0505012;border:1px solid #f0505035;border-radius:8px;padding:10px 16px;
+        color:var(--red2);margin:10px 18px;font-size:11px}
+
+/* ── MOBILE ────────────────────────────── */
+@media(max-width:768px){
+  html,body{overflow:auto;height:auto}
+  nav{height:auto;min-height:44px;flex-wrap:wrap;padding:8px 12px;gap:6px}
+  .logo{font-size:13px}
+  .nsep{display:none}
+  .nav-r{width:100%;justify-content:space-between;gap:6px}
+  .rinfo{display:none}
+  .nprice{font-size:14px}
+  .nchg{font-size:10px}
+  .srch-inp{width:140px;font-size:11px}
+  .tabbar{height:34px;padding:0 12px}
+  .tab{padding:0 12px;font-size:11px}
+  .pg{height:auto;overflow:visible}
+  .sa{padding:4px 10px 2px}
+  .cards{flex-direction:column;gap:6px}
+  .card{min-width:unset}
+  .p25p{padding:6px 10px}
+  .p25-cols{grid-template-columns:50px 1fr 60px 56px 80px;gap:4px}
+  .ins{padding:10px 12px}
+  .chips{gap:4px}
+  .chip{min-width:70px;padding:5px 8px}
+  .chip-v{font-size:11px}
+  .charts{grid-template-columns:1fr;gap:8px}
+  .charts-2{grid-template-columns:1fr;gap:8px}
+  .ch-wrap{height:140px}
+  .ta{padding:0 10px 16px}
+  .tscroll{max-height:none;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{font-size:10px}
+  td{padding:4px 6px;min-width:56px;font-size:10px}
+  td:nth-child(1){width:28px;min-width:28px}
+  td:nth-child(2){min-width:90px;max-width:120px}
+  thead th{padding:5px 6px;font-size:7px}
+  .dd{width:calc(100vw - 24px);left:-40px}
+}
+@media(max-width:420px){
+  nav{padding:6px 8px}
+  .sa{padding:2px 6px 2px}
+  .ta{padding:0 6px 12px}
+  .cards{gap:4px}
+  .chip{min-width:60px;padding:4px 6px}
+  .chip-v{font-size:10px}
+  .chip-l{font-size:7px}
+  td{padding:3px 4px;min-width:50px}
+  .p25-cols{grid-template-columns:40px 1fr 50px 46px 68px;gap:2px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">ListingCore <span class="logo-v">1.1.2</span></div>
+  <div class="nsep"></div>
+  <div class="srch-wrap">
+    <div class="tok-badge" id="nav-badge" onclick="openSearch()" title="Click to search">$FOLKS ▾</div>
+    <input class="srch-inp" id="srch" placeholder="Search token…" autocomplete="off" style="display:none;position:absolute;top:50%;transform:translateY(-50%);left:0;z-index:10">
+    <div class="dd" id="dd"></div>
+  </div>
+  <div class="nav-price-wrap">
+    <span class="live-dot" id="live-dot"></span>
+    <span id="nav-price" class="nprice">—</span>
+    <span id="nav-chg" class="nchg">…</span>
+  </div>
+  <div class="nav-r">
+    <button class="alert-btn" onclick="openAlerts()">Alerts<span class="alert-count" id="alert-cnt" style="display:none">0</span></button>
+    <button class="nbtn" onclick="refreshAll()">Refresh</button>
+    <button class="nbtn" id="theme-btn" onclick="toggleTheme()">Dark</button>
+  </div>
+</nav>
+
+<div class="tabbar">
+  <div class="tab on" id="tab-a" onclick="showTab('a')">Alpha</div>
+  <div class="tab" id="tab-p" onclick="showTab('p')">Perpetuals</div>
+</div>
+
+<!-- ALPHA PAGE -->
+<div class="pg on" id="pg-a">
+  <div id="a-spin" class="spin"><div class="spinner"></div>Loading Alpha universe…</div>
+  <div id="a-err" class="errbox" style="display:none"></div>
+  <div id="a-body" style="display:none;flex:1;min-height:0;flex-direction:column">
+
+    <div class="sa">
+      <div class="cards">
+        <div class="card ca">
+          <div class="clbl">Market Cap</div>
+          <div class="cval" id="a-mc-v">—</div>
+          <div class="csub" id="a-mc-s">—</div>
+          <div class="cbar"><div class="cbar-f" id="a-mc-b" style="background:var(--accent);width:0"></div></div>
+          <span class="cbadge" id="a-mc-z"></span>
+        </div>
+        <div class="card cy">
+          <div class="clbl">24h Volume</div>
+          <div class="cval" id="a-vl-v">—</div>
+          <div class="csub" id="a-vl-s">—</div>
+          <div class="cbar"><div class="cbar-f" id="a-vl-b" style="background:var(--cyan);width:0"></div></div>
+          <span class="cbadge" id="a-vl-z"></span>
+        </div>
+        <div class="card cg">
+          <div class="clbl">FDV</div>
+          <div class="cval" id="a-fd-v">—</div>
+          <div class="csub" id="a-fd-s">—</div>
+          <div class="cbar"><div class="cbar-f" id="a-fd-b" style="background:var(--green);width:0"></div></div>
+          <span class="cbadge" id="a-fd-z"></span>
+        </div>
+        <div class="card co">
+          <div class="clbl">24h Volume (All)</div>
+          <div class="cval" id="a-tvol">—</div>
+          <div class="csub" id="a-tvol-s">Total Alpha universe</div>
+        </div>
+      </div>
+
+      <div class="p25p">
+        <div class="p25-hd">Distance from Bottom 25%</div>
+        <div class="p25-cols" style="padding:2px 0 6px;font-size:8px;color:var(--txt4);text-transform:uppercase;letter-spacing:.5px;font-weight:700">
+          <div>Metric</div><div>Position</div><div style="text-align:right">Value</div><div style="text-align:right">P25</div><div style="text-align:right">Δ vs P25</div>
+        </div>
+        <div id="a-p25-mc" class="p25-row p25-cols"></div>
+        <div id="a-p25-vl" class="p25-row p25-cols"></div>
+        <div id="a-p25-fd" class="p25-row p25-cols"></div>
+      </div>
+
+      <div class="ins" id="a-ins-box">
+        <div class="ins-top">
+          <span class="ins-label">Intelligence</span>
+          <span class="ins-rank" id="a-rnk">—</span>
+          <span class="ins-pct" id="a-ins-pct">—</span>
+        </div>
+        <div class="ins-summary" id="a-ins-summary"></div>
+        <div class="ins-grid" id="a-ins-grid"></div>
+        <div class="chips">
+          <div class="chip"><div class="chip-v" id="a-vrnk">—</div><div class="chip-l">Composite</div></div>
+          <div class="chip"><div class="chip-v" id="a-vm">—</div><div class="chip-l">Vol/MCap</div></div>
+          <div class="chip"><div class="chip-v" id="a-fm">—</div><div class="chip-l">FDV/MCap</div></div>
+          <div class="chip"><div class="chip-v" id="a-chg">—</div><div class="chip-l">24h</div></div>
+          <div class="chip"><div class="chip-v" id="a-drnk">—</div><div class="chip-l">Δ Rank</div></div>
+        </div>
+        <div class="ins-footnote">Composite = avg percentile of MCap + Volume + FDV across the Alpha universe</div>
+      </div>
+
+      <div class="charts">
+        <div class="chcard"><div class="ch-lbl">MCap Distribution</div><div class="ch-wrap"><canvas id="ch-amc"></canvas></div></div>
+        <div class="chcard"><div class="ch-lbl">Volume Distribution</div><div class="ch-wrap"><canvas id="ch-avl"></canvas></div></div>
+        <div class="chcard"><div class="ch-lbl">MCap vs Volume (log)</div><div class="ch-wrap"><canvas id="ch-asc"></canvas></div></div>
+        <div class="chcard"><div class="ch-lbl">24h Traders Distribution</div><div class="ch-wrap"><canvas id="ch-atr"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="ta">
+      <div class="tbox">
+        <div class="tbar">
+          <div class="ttl">Binance Alpha · <span id="a-cnt">—</span> tokens</div>
+          <input class="tf" id="a-tf" placeholder="Filter…">
+        </div>
+        <div class="tscroll">
+          <table id="tbl-a">
+            <thead><tr>
+              <th>#</th><th>Token</th>
+              <th data-c="market_cap" class="srt">MCap</th>
+              <th data-c="fully_diluted_valuation">FDV</th>
+              <th data-c="total_volume">24h Vol</th>
+              <th data-c="price_change_percentage_24h_in_currency">24h %</th>
+              <th data-c="current_price">Price</th>
+              <th data-c="basis">vs Perp</th>
+              <th data-c="perp_oi">Perp OI</th>
+              <th data-c="perp_vol">Perp Vol</th>
+            </tr></thead>
+            <tbody id="tb-a"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PERPS PAGE -->
+<div class="pg" id="pg-p">
+  <div id="p-spin" class="spin"><div class="spinner"></div>Loading perpetuals…</div>
+  <div id="p-err" class="errbox" style="display:none"></div>
+  <div id="p-body" style="display:none;flex:1;min-height:0;flex-direction:column">
+
+    <div class="sa">
+      <div class="cards">
+        <div class="card co">
+          <div class="clbl">Open Interest</div>
+          <div class="cval" id="p-oi-v">—</div>
+          <div class="csub" id="p-oi-s">—</div>
+          <div class="cbar"><div class="cbar-f" id="p-oi-b" style="background:var(--gold);width:0"></div></div>
+          <span class="cbadge" id="p-oi-z"></span>
+        </div>
+        <div class="card cy">
+          <div class="clbl">24h Volume</div>
+          <div class="cval" id="p-vl-v">—</div>
+          <div class="csub" id="p-vl-s">—</div>
+          <div class="cbar"><div class="cbar-f" id="p-vl-b" style="background:var(--cyan);width:0"></div></div>
+          <span class="cbadge" id="p-vl-z"></span>
+        </div>
+        <div class="card cg">
+          <div class="clbl">FDV</div>
+          <div class="cval" id="p-fd-v">—</div>
+          <div class="csub" id="p-fd-s">—</div>
+          <div class="cbar"><div class="cbar-f" id="p-fd-b" style="background:var(--green);width:0"></div></div>
+          <span class="cbadge" id="p-fd-z"></span>
+        </div>
+        <div class="card ca">
+          <div class="clbl">Price / Basis</div>
+          <div class="cval" id="p-pr">—</div>
+          <div class="csub" id="p-chg">—</div>
+          <div class="csub" id="p-basis-info" style="margin-top:2px">—</div>
+        </div>
+      </div>
+
+      <div class="p25p">
+        <div class="p25-hd">Distance from Bottom 25%</div>
+        <div class="p25-cols" style="padding:2px 0 6px;font-size:8px;color:var(--txt4);text-transform:uppercase;letter-spacing:.5px;font-weight:700">
+          <div>Metric</div><div>Position</div><div style="text-align:right">Value</div><div style="text-align:right">P25</div><div style="text-align:right">Δ vs P25</div>
+        </div>
+        <div id="p-p25-oi" class="p25-row p25-cols"></div>
+        <div id="p-p25-vl" class="p25-row p25-cols"></div>
+        <div id="p-p25-fd" class="p25-row p25-cols"></div>
+      </div>
+
+      <div class="ins" id="p-ins-box">
+        <div class="ins-top">
+          <span class="ins-label">Intelligence</span>
+          <span class="ins-rank" id="p-oirnk">—</span>
+          <span class="ins-pct" id="p-ins-pct">—</span>
+        </div>
+        <div class="ins-summary" id="p-ins-summary"></div>
+        <div class="ins-grid ins-grid-6" id="p-ins-grid"></div>
+        <div class="chips">
+          <div class="chip"><div class="chip-v" id="p-vrnk">—</div><div class="chip-l">Composite</div></div>
+          <div class="chip"><div class="chip-v" id="p-voi">—</div><div class="chip-l">Vol/OI</div></div>
+          <div class="chip"><div class="chip-v" id="p-fdmc">—</div><div class="chip-l">FDV/MCap</div></div>
+          <div class="chip"><div class="chip-v" id="p-chg2">—</div><div class="chip-l">24h</div></div>
+          <div class="chip"><div class="chip-v" id="p-drnk">—</div><div class="chip-l">Δ Rank</div></div>
+        </div>
+        <div class="ins-footnote">Composite = avg percentile of OI + Volume + FDV across active perpetuals</div>
+      </div>
+    </div>
+
+    <div class="sa" style="padding-top:0">
+      <div class="charts-2">
+        <div class="chcard"><div class="ch-lbl">OI Distribution</div><div class="ch-wrap"><canvas id="ch-poi"></canvas></div></div>
+        <div class="chcard"><div class="ch-lbl">OI vs Volume (log scale)</div><div class="ch-wrap"><canvas id="ch-psc"></canvas></div></div>
+        <div class="chcard"><div class="ch-lbl">24h Traders Distribution</div><div class="ch-wrap"><canvas id="ch-ptr"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="ta">
+      <div class="tbox">
+        <div class="tbar">
+          <div class="ttl">Binance Perps · <span id="p-cnt">—</span> active</div>
+          <input class="tf" id="p-tf" placeholder="Filter…">
+        </div>
+        <div class="tscroll" style="max-height:635px">
+          <table id="tbl-p">
+            <thead><tr>
+              <th>#</th><th>Symbol</th>
+              <th data-c="oi" class="srt">Open Interest</th>
+              <th data-c="volume">24h Volume</th>
+              <th data-c="trades">24h Trades</th>
+              <th data-c="fdv">FDV</th>
+              <th data-c="market_cap">MCap</th>
+              <th data-c="change24h">24h %</th>
+              <th data-c="price">Price</th>
+              <th data-c="spot_vol">Spot Vol</th>
+              <th data-c="basis">vs Spot</th>
+            </tr></thead>
+            <tbody id="tb-p"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ALERTS MODAL -->
+<div class="modal-bg" id="alert-modal" onclick="if(event.target===this)closeAlerts()">
+  <div class="modal">
+    <h3>Alerts</h3>
+    <label>Telegram Bot Token</label>
+    <input id="tg-token" placeholder="123456:ABC-DEF..." autocomplete="off">
+    <label>Chat ID</label>
+    <div class="modal-row tg-row" style="border:none;padding:0;margin:0">
+      <input id="tg-chat" placeholder="-1001234567890" autocomplete="off">
+      <button class="mbtn mbtn-ghost" onclick="testTelegram()">Test</button>
+    </div>
+    <span class="tg-status tg-off" id="tg-status">Not connected</span>
+
+    <label style="margin-top:16px">New Alert</label>
+    <div class="modal-row">
+      <select id="al-metric">
+        <option value="price">Price</option>
+        <option value="market_cap">MCap</option>
+        <option value="total_volume">24h Volume</option>
+        <option value="fdv">FDV</option>
+        <option value="oi">Open Interest</option>
+        <option value="change24h">24h %</option>
+        <option value="comp_pct">Composite %ile</option>
+        <option value="comp_rank">Composite Rank</option>
+      </select>
+      <select id="al-cond">
+        <option value="gt">Above</option>
+        <option value="lt">Below</option>
+      </select>
+      <input id="al-val" placeholder="Value" type="number">
+      <button class="mbtn mbtn-primary" onclick="addAlert()">Add</button>
+    </div>
+
+    <div class="alert-list" id="alert-list"></div>
+    <div class="modal-actions">
+      <button class="mbtn mbtn-ghost" onclick="closeAlerts()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api/proxy';
+const ALPHA_TTL = 10 * 60 * 1000;  // 10 min between alpha refreshes
+const PERPS_TTL = 10 * 60 * 1000;  // 10 min between perps refreshes
+
+// State
+let aRows = [], pRows = [];
+let selA = 'folks', selP = 'FOLKS';
+let prevARanks = {}, prevPRanks = {};
+let spotMap = {}; // Binance spot price map: symbol → price
+let aSort = {c:'market_cap', asc:false}, pSort = {c:'oi', asc:false};
+let aQ = '', pQ = '';
+let aTs = 0, pTs = 0;
+let charts = {}, ticker = null;
+
+// Rank snapshot: save current composite ranks each refresh; delta = current vs last page-load baseline
+// prevARanks/prevPRanks are loaded ONCE at startup (previous session's snapshot) and stay frozen in memory.
+// Each refresh writes a new snapshot to localStorage so the NEXT page load has a fresh baseline to diff against.
+function snapLoad(key){ try{ return JSON.parse(localStorage.getItem(key)||'null')?.ranks||{}; }catch(e){ return{}; } }
+function snapSave(key,ranks){ try{ localStorage.setItem(key,JSON.stringify({ts:Date.now(),ranks})); }catch(e){} }
+prevARanks = snapLoad('bi_alpha_snap');
+prevPRanks = snapLoad('bi_perps_snap');
+
+// Basis computation — run after either table updates so cross-ref stays fresh
+function computeAlphaBasis(){
+  aRows.forEach(c=>{
+    const sym=c.symbol.toUpperCase(), pr=c.current_price||0;
+    const perp=pRows.find(p=>p.symbol===sym||p.symbol===sym.replace(/^1000/,'')||sym===p.symbol.replace(/^1000/,''));
+    c.basis  = (perp&&pr>0) ? (perp.price-pr)/pr*100 : null;
+    c.perp_oi  = perp?.oi   || 0;
+    c.perp_vol = perp?.volume|| 0;
+  });
+}
+function computePerpsBasis(){
+  pRows.forEach(p=>{
+    const sp=spotMap[p.symbol+'USDT']||spotMap[p.symbol.replace(/^1000/,'')+'USDT']||0;
+    p.basis = (sp>0&&p.price>0) ? (p.price-sp)/sp*100 : null;
+  });
+}
+
+// Helpers
+function proxy(source, path=''){
+  const url = `${API}?source=${encodeURIComponent(source)}${path?`&path=${encodeURIComponent(path)}`:''}`;
+  return fetch(url).then(r=>{if(!r.ok)throw new Error(source.toUpperCase()+' '+r.status+' '+path);return r.json();});
+}
+async function fetchOpenInterestBatch(symbols){
+  const r = await fetch('/api/batch-open-interest',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({ symbols })
+  });
+  if(!r.ok) throw new Error('Open interest batch '+r.status);
+  return r.json();
+}
+// Global CG queue: serializes ALL CG requests with a min interval to avoid rate limiting
+// This ensures Alpha and Perps loaders can run in parallel without colliding.
+let _cgQueue = Promise.resolve();
+let _cgLastFire = 0;
+const CG_MIN_INTERVAL = 200;  // server cache absorbs most calls
+function cgRaw(path){ return proxy('cg', path); }
+function cg(path){
+  // Chain onto the global queue so requests run sequentially
+  const job = _cgQueue.then(async ()=>{
+    const wait = Math.max(0, CG_MIN_INTERVAL - (Date.now() - _cgLastFire));
+    if(wait>0) await new Promise(r=>setTimeout(r,wait));
+    _cgLastFire = Date.now();
+    return cgRaw(path);
+  });
+  _cgQueue = job.catch(()=>{}); // Don't break the chain on error
+  return job;
+}
+async function cgRetry(path, retries=3, delay=2500){
+  for(let i=0;i<=retries;i++){
+    try{ return await cg(path); }catch(e){
+      if(i<retries){ await new Promise(r=>setTimeout(r,delay*(i+1))); continue; }
+      throw e;
+    }
+  }
+}
+async function cgSeq(paths, delay=0){
+  // Delay no longer needed since cg() enforces global throttling
+  const results=[];
+  for(const p of paths){
+    results.push(await cgRetry(p).catch(()=>[]));
+  }
+  return results;
+}
+function bf(path){ return proxy('fapi', path); }
+function bs(){ return proxy('spot24hr'); }
+
+function $m(n){
+  if(n==null||isNaN(n)||n===0) return '<span class="na">—</span>';
+  const a=Math.abs(n);
+  if(a>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
+  if(a>=1e6) return '$'+(n/1e6).toFixed(2)+'M';
+  if(a>=1e3) return '$'+(n/1e3).toFixed(1)+'K';
+  return '$'+n.toFixed(4);
+}
+function $p(n){
+  if(n==null||isNaN(n)) return '<span class="na">—</span>';
+  return `<span class="${n>=0?'g':'r'}">${n>=0?'+':''}${n.toFixed(2)}%</span>`;
+}
+function txt(h){ return String(h).replace(/<[^>]+>/g,''); }
+function pctile(arr,v){ return arr.length?Math.round(arr.filter(x=>x<v).length/arr.length*100):0; }
+function p25v(arr){ return arr[Math.floor(arr.length*0.25)]||0; }
+function fk(v){ if(v>=1e9)return(v/1e9).toFixed(1)+'B';if(v>=1e6)return(v/1e6).toFixed(1)+'M';if(v>=1e3)return(v/1e3).toFixed(0)+'K';return v.toFixed(2); }
+
+function setBadge(id, pct){
+  const el = document.getElementById(id); if(!el) return;
+  if(pct>=75){el.className='cbadge b-top';el.textContent=`Top ${100-pct}% ▲`;}
+  else if(pct>=40){el.className='cbadge b-mid';el.textContent=`${pct}th pct`;}
+  else{el.className='cbadge b-low';el.textContent=`Bottom ${pct}% ▼`;}
+}
+
+function rkDelta(cur, prev){
+  if(!prev) return '<span class="rkn">—</span>';
+  const d = prev - cur;
+  if(d===0) return '<span class="rkn">—</span>';
+  return d>0 ? `<span class="rku">↑${d}</span>` : `<span class="rkd">↓${Math.abs(d)}</span>`;
+}
+
+// P25 row renderer — cleaner threshold display using log-ratio for skewed distributions
+// rankMeta: optional { rank, n } for universe rank (e.g. FDV #141/564 on perpetuals)
+function p25row(elId, lbl, val, sorted, rankMeta){
+  const el = document.getElementById(elId); if(!el) return;
+  const p25 = p25v(sorted);
+  const p50 = sorted[Math.floor(sorted.length*0.5)]||0;
+  const tp  = pctile(sorted, val);
+  const above = val >= p25;
+  // Use multiplicative ratio capped for readability
+  let diffStr;
+  if(p25>0){
+    const ratio = val/p25;
+    if(above){
+      diffStr = ratio>=2 ? `×${ratio.toFixed(1)} P25` : `+${((ratio-1)*100).toFixed(0)}% P25`;
+    } else {
+      const pct = ((1-ratio)*100).toFixed(0);
+      diffStr = `${pct}% below P25`;
+    }
+  } else { diffStr = val>0?'Above P25':'No data'; }
+  const p25pos = 25, tokpos = Math.min(96, Math.max(4, tp));
+  const fillStyle = above
+    ? `left:${p25pos}%;width:${Math.max(0,tokpos-p25pos)}%`
+    : `left:${tokpos}%;width:${Math.max(0,p25pos-tokpos)}%`;
+  const rankLine = rankMeta && rankMeta.n > 0
+    ? `<div class="p25-rnk">#${rankMeta.rank}/${rankMeta.n}</div>`
+    : '';
+  const tipTxt=`${lbl}: ${txt($m(val))} — ${tp}th percentile${rankMeta?' (#'+rankMeta.rank+'/'+rankMeta.n+')':''}. P25 threshold: ${txt($m(p25))}. ${diffStr}.`;
+  el.innerHTML = `
+    <div class="p25-lbl">${lbl}</div>
+    <div class="p25-track" title="${tipTxt}">
+      <div class="${above?'p25-fill-a':'p25-fill-b'}" style="${fillStyle}"></div>
+      <div class="p25-line" style="left:${p25pos}%"></div>
+      <div class="p25-dot" style="left:${tokpos}%;background:${above?'var(--green)':'var(--red2)'}" title="${tp}th pct — ${txt($m(val))}"></div>
+    </div>
+    <div class="p25-tv">${txt($m(val))}${rankLine}</div>
+    <div class="p25-pv">${txt($m(p25))}</div>
+    <div class="p25-dv ${above?'above':'below'}">${diffStr}</div>`;
+}
+
+// Charts — auto log-10 bins that adapt to data range
+function mkBins(data){
+  const pos=data.filter(v=>v>0);
+  if(pos.length<2) return null;
+  const mn=Math.floor(Math.log10(Math.min(...pos)));
+  const mx=Math.ceil(Math.log10(Math.max(...pos)));
+  const bins=[];
+  for(let e=mn;e<mx;e++){
+    const lo=Math.pow(10,e), hi=Math.pow(10,e+1);
+    bins.push({count:pos.filter(v=>v>=lo&&v<hi).length,lo,hi});
+  }
+  // Merge any empty leading/trailing bins
+  while(bins.length>2&&bins[0].count===0) bins.shift();
+  while(bins.length>2&&bins[bins.length-1].count===0) bins.pop();
+  return {bins};
+}
+function drawDist(id, sorted, tok, color, prefix='$'){
+  if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+  const r=mkBins(sorted); if(!r) return;
+  const {bins}=r;
+  const p25=sorted[Math.floor(sorted.length*0.25)]||0;
+  const p75=sorted[Math.floor(sorted.length*0.75)]||0;
+  const findBin=v=>{if(v<=0)return-1;return bins.findIndex(b=>v>=b.lo&&v<b.hi);};
+  const p25i=findBin(p25), p75i=findBin(p75), fi=findBin(tok);
+  const bg=bins.map((_,i)=>{
+    if(i===fi) return '#f59e0b';
+    if(p25i>=0&&i<=p25i) return '#ef444455';
+    if(p75i>=0&&i>=p75i) return '#10b98155';
+    return color+'44';
+  });
+  const bd=bins.map((_,i)=>{
+    if(i===fi) return '#f59e0b';
+    if(p25i>=0&&i<=p25i) return '#ef444488';
+    if(p75i>=0&&i>=p75i) return '#10b98188';
+    return color+'88';
+  });
+  const labels=bins.map((b,i)=>{
+    const lbl=prefix+fk(b.lo);
+    if(i===p25i) return lbl+' P25';
+    if(i===p75i) return lbl+' P75';
+    return lbl;
+  });
+  try{
+    charts[id]=new Chart(document.getElementById(id),{
+      type:'bar',
+      data:{labels,datasets:[{data:bins.map(b=>b.count),backgroundColor:bg,borderColor:bd,borderWidth:1,
+        barPercentage:0.85,categoryPercentage:0.85}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{
+          title:it=>{const i=it[0].dataIndex;const b=bins[i];
+            return prefix+fk(b.lo)+' – '+prefix+fk(b.hi)+(p25i>=0&&i<=p25i?' (Bottom 25%)':p75i>=0&&i>=p75i?' (Top 25%)':i===fi?' ★ Token':'');},
+          label:it=>it.raw+' tokens'
+        }}},
+        scales:{
+          x:{ticks:{color:'#64748b',font:{size:8},maxRotation:0,autoSkip:false},grid:{display:false}},
+          y:{beginAtZero:true,ticks:{color:'#64748b',font:{size:8},maxTicksLimit:4},grid:{color:'#1e293b15'}}
+        }
+      }
+    });
+  }catch(e){console.warn('chart err',e);}
+}
+function drawScatter(id, rows, tokId, kx, ky){
+  if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+  const tok = rows.find(r=>r.id===tokId||r.symbol===tokId);
+  if(!tok) return;
+  const others = rows.filter(r=>r!==tok);
+  try{
+    charts[id] = new Chart(document.getElementById(id),{
+      type:'scatter',
+      data:{datasets:[
+        {label:'All',data:others.filter(r=>(r[kx]||0)>0&&(r[ky]||0)>0).map(r=>({x:Math.log10(r[kx]),y:Math.log10(r[ky]),r})),backgroundColor:'#6366f118',borderColor:'#6366f144',pointRadius:3},
+        {label:'★',data:tok[kx]>0&&tok[ky]>0?[{x:Math.log10(tok[kx]),y:Math.log10(tok[ky]),r:tok}]:[],backgroundColor:'#f59e0b',borderColor:'#f59e0b',pointRadius:9}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:'#94a3b8',boxWidth:10,font:{size:10}}},
+          tooltip:{callbacks:{label:it=>{const r=it.raw.r;return`${(r.symbol||r.name||'').toUpperCase()}: ${txt($m(r[kx]))} / ${txt($m(r[ky]))}`;
+        }}}},
+        scales:{
+          x:{title:{display:true,text:'log MCap',color:'#64748b',font:{size:8}},ticks:{color:'#64748b',font:{size:8},maxRotation:0,maxTicksLimit:6,callback:v=>'$'+fk(Math.pow(10,v))},grid:{color:'#1e293b22'}},
+          y:{title:{display:true,text:'log Vol',color:'#64748b',font:{size:8}},ticks:{color:'#64748b',font:{size:8},maxTicksLimit:5,callback:v=>'$'+fk(Math.pow(10,v))},grid:{color:'#1e293b22'}}
+        }
+      }
+    });
+  }catch(e){ console.warn('scatter err',e); }
+}
+
+// Tab switching
+function showTab(t){
+  ['a','p'].forEach(x=>{
+    document.getElementById('pg-'+x).classList.toggle('on',x===t);
+    document.getElementById('tab-'+x).classList.toggle('on',x===t);
+  });
+}
+
+// Theme — persist to localStorage; default light
+(function initTheme(){
+  const saved=localStorage.getItem('bi_theme');
+  if(saved){document.documentElement.dataset.theme=saved;document.getElementById('theme-btn').textContent=saved==='dark'?'Light':'Dark';}
+})();
+function toggleTheme(){
+  const t = document.documentElement.dataset.theme==='dark'?'light':'dark';
+  document.documentElement.dataset.theme=t;
+  localStorage.setItem('bi_theme',t);
+  document.getElementById('theme-btn').textContent=t==='dark'?'Light':'Dark';
+}
+
+// Countdown ticker
+function startTicker(){
+  clearInterval(ticker);
+  ticker = setInterval(()=>{
+    const now=Date.now();
+    const latest=Math.max(aTs,pTs);
+    document.getElementById('live-dot').className='live-dot'+((latest>0)?'':' off');
+    if(now>=aTs+ALPHA_TTL&&aTs>0) loadAlpha();
+    if(now>=pTs+PERPS_TTL&&pTs>0) loadPerps();
+  },5000);
+}
+function refreshAll(){ loadAlpha(); loadPerps(); }
+
+// Search: click badge → show input, blur → hide
+function openSearch(){
+  const badge=document.getElementById('nav-badge'), inp=document.getElementById('srch');
+  badge.style.display='none'; inp.style.display='block'; inp.value=''; inp.focus();
+}
+function closeSearch(){
+  setTimeout(()=>{
+    document.getElementById('srch').style.display='none';
+    document.getElementById('nav-badge').style.display='';
+    document.getElementById('dd').classList.remove('open');
+  },200);
+}
+document.getElementById('srch').addEventListener('input',e=>buildDD(e.target.value));
+document.getElementById('srch').addEventListener('blur',closeSearch);
+document.addEventListener('click',e=>{ if(!e.target.closest('.srch-wrap')){ document.getElementById('dd').classList.remove('open'); } });
+
+function buildDD(q){
+  const dd = document.getElementById('dd');
+  const ql = q.trim().toLowerCase();
+  if(!ql){ dd.classList.remove('open'); return; }
+  const am = aRows.filter(c=>c.symbol.toLowerCase().includes(ql)||c.name.toLowerCase().includes(ql)).slice(0,6);
+  const pm = pRows.filter(p=>p.symbol.toLowerCase().includes(ql)||p.name.toLowerCase().includes(ql)).slice(0,6);
+  if(!am.length&&!pm.length){ dd.classList.remove('open'); return; }
+  let h='';
+  if(am.length){
+    h+='<div class="dd-sec">Alpha</div>';
+    am.forEach(c=>{
+      h+=`<div class="dd-row" data-src="a" data-id="${c.id}" data-sym="${c.symbol.toUpperCase()}">
+        <img src="${c.image}" onerror="this.style.display='none'">
+        <div><div class="dd-sym">${c.symbol.toUpperCase()}</div><div class="dd-name">${c.name}</div></div>
+        <span class="dd-tag tag-a">Alpha</span></div>`;
+    });
+  }
+  if(pm.length){
+    h+='<div class="dd-sec">Perpetuals</div>';
+    pm.forEach(p=>{
+      h+=`<div class="dd-row" data-src="p" data-id="" data-sym="${p.symbol}">
+        <img src="${p.image}" onerror="this.style.display='none'">
+        <div><div class="dd-sym">${p.symbol}</div><div class="dd-name">${p.name}</div></div>
+        <span class="dd-tag tag-p">Perp</span></div>`;
+    });
+  }
+  dd.innerHTML = h;
+  dd.classList.add('open');
+  dd.querySelectorAll('.dd-row').forEach(row=>{
+    row.addEventListener('click',()=>selectToken(row.dataset.src, row.dataset.id, row.dataset.sym));
+  });
+}
+
+function selectToken(src, id, sym){
+  document.getElementById('srch').value='';
+  document.getElementById('dd').classList.remove('open');
+  document.getElementById('nav-badge').textContent='$'+sym;
+  if(src==='a'){ selA=id||sym.toLowerCase(); renderAlphaStats(); renderAlphaTable(); }
+  if(src==='p'){ selP=sym; renderPerpsStats(); renderPerpsTable(); }
+  // Cross-reference
+  if(src==='a'){ const pp=pRows.find(p=>p.symbol===sym); if(pp){selP=sym;renderPerpsStats();renderPerpsTable();} }
+  if(src==='p'){ const aa=aRows.find(c=>c.symbol.toUpperCase()===sym); if(aa){selA=aa.id;renderAlphaStats();renderAlphaTable();} }
+  // Nav price
+  const af=aRows.find(c=>c.id===selA), pf=pRows.find(p=>p.symbol===selP);
+  const pr=(af?.current_price)||(pf?.price);
+  const ch=(af?.price_change_percentage_24h_in_currency)??(pf?.change24h);
+  if(pr) document.getElementById('nav-price').textContent='$'+pr.toFixed(pr<0.01?6:4);
+  if(ch!=null){const el=document.getElementById('nav-chg');el.textContent=(ch>=0?'+':'')+ch.toFixed(2)+'%';el.className='nchg '+(ch>=0?'up':'dn');}
+}
+
+// ── ALPHA ────────────────────────────────────────
+function renderAlphaStats(){
+  const f = aRows.find(c=>c.id===selA); if(!f) return;
+  const mc = aRows.map(c=>c.market_cap||0).filter(v=>v>0).sort((a,b)=>a-b);
+  const vc = aRows.map(c=>c.total_volume||0).filter(v=>v>0).sort((a,b)=>a-b);
+  const fc = aRows.map(c=>c.fully_diluted_valuation||0).filter(v=>v>0).sort((a,b)=>a-b);
+  const mp=pctile(mc,f.market_cap), vp=pctile(vc,f.total_volume), fp=pctile(fc,f.fully_diluted_valuation);
+  const mr=aRows.filter(c=>(c.market_cap||0)>(f.market_cap||0)).length+1;
+  const vr=aRows.filter(c=>(c.total_volume||0)>(f.total_volume||0)).length+1;
+  const fr=aRows.filter(c=>(c.fully_diluted_valuation||0)>(f.fully_diluted_valuation||0)).length+1;
+  const ch=f.price_change_percentage_24h_in_currency||0;
+
+  // Composite rank: average of MCap, Volume and FDV percentiles
+  const compScores=aRows.map(c=>({id:c.id,comp:(pctile(mc,c.market_cap||0)+pctile(vc,c.total_volume||0)+pctile(fc,c.fully_diluted_valuation||0))/3}));
+  compScores.sort((a,b)=>b.comp-a.comp);
+  const compRank=compScores.findIndex(c=>c.id===f.id)+1;
+  const compPct=Math.round((compScores.find(c=>c.id===f.id)?.comp)||0);
+
+  // Nav
+  const pr=f.current_price||0;
+  document.getElementById('nav-price').textContent='$'+pr.toFixed(pr<0.01?6:4);
+  const ce=document.getElementById('nav-chg');ce.textContent=(ch>=0?'+':'')+ch.toFixed(2)+'%';ce.className='nchg '+(ch>=0?'up':'dn');
+
+  // Cards
+  document.getElementById('a-mc-v').textContent=txt($m(f.market_cap));
+  document.getElementById('a-mc-s').textContent=`${mp}th pct · #${mr}/${aRows.length}`;
+  document.getElementById('a-mc-b').style.width=mp+'%';
+  setBadge('a-mc-z',mp);
+
+  document.getElementById('a-vl-v').textContent=txt($m(f.total_volume));
+  document.getElementById('a-vl-s').textContent=`${vp}th pct · #${vr}/${aRows.length}`;
+  document.getElementById('a-vl-b').style.width=vp+'%';
+  setBadge('a-vl-z',vp);
+
+  document.getElementById('a-fd-v').textContent=txt($m(f.fully_diluted_valuation));
+  document.getElementById('a-fd-s').textContent=`${fp}th pct · #${fr}/${aRows.length}`;
+  document.getElementById('a-fd-b').style.width=fp+'%';
+  setBadge('a-fd-z',fp);
+
+  // P25
+  p25row('a-p25-mc','MCap',f.market_cap,mc);
+  p25row('a-p25-vl','Volume',f.total_volume,vc);
+  p25row('a-p25-fd','FDV',f.fully_diluted_valuation,fc,{rank:fr,n:aRows.length});
+
+  // Insight
+  const vm=f.market_cap?((f.total_volume/f.market_cap)*100).toFixed(1)+'%':'—';
+  const fm=f.market_cap&&f.fully_diluted_valuation?(f.fully_diluted_valuation/f.market_cap).toFixed(2)+'x':'—';
+  const sym=f.symbol.toUpperCase();
+  const dilution=f.fully_diluted_valuation&&f.market_cap?(f.fully_diluted_valuation/f.market_cap):1;
+  // Populate intelligence card
+  const pctCls=compPct>=75?'ins-pct-high':compPct>=40?'ins-pct-mid':'ins-pct-low';
+  document.getElementById('a-ins-pct').className='ins-pct '+pctCls;
+  document.getElementById('a-ins-pct').textContent=compPct+'th pct';
+  document.getElementById('a-rnk').textContent='#'+compRank+'/'+aRows.length;
+  function statCls(p){return p>=75?'high':p>=40?'mid':'low';}
+  // Summary wording
+  const aMetrics=[{n:'MCap',p:mp},{n:'Volume',p:vp},{n:'FDV',p:fp}];
+  const aBest=aMetrics.reduce((a,b)=>b.p>a.p?b:a);
+  const aWorst=aMetrics.reduce((a,b)=>b.p<a.p?b:a);
+  let aSummary=`${sym} sits at the ${compPct}th percentile across Alpha — strongest in ${aBest.n} (${aBest.p}th), weakest in ${aWorst.n} (${aWorst.p}th).`;
+  if(dilution>3) aSummary+=` High dilution at ${dilution.toFixed(1)}x FDV/MCap — significant unlock risk.`;
+  else if(dilution>1.5) aSummary+=` Moderate ${dilution.toFixed(1)}x dilution.`;
+  if(compPct<25) aSummary+=' Bottom quartile — elevated delisting risk.';
+  document.getElementById('a-ins-summary').textContent=aSummary;
+  document.getElementById('a-ins-grid').innerHTML=
+    `<div class="ins-stat"><div class="ins-stat-label">MCap</div><div class="ins-stat-val ${statCls(mp)}">${mp}th</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">Volume</div><div class="ins-stat-val ${statCls(vp)}">${vp}th</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">FDV</div><div class="ins-stat-val ${statCls(fp)}">${fp}th</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">Dilution</div><div class="ins-stat-val ${dilution>3?'low':dilution>1.5?'mid':'high'}">${dilution.toFixed(1)}x</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">24h</div><div class="ins-stat-val ${ch>=0?'high':'low'}">${ch>=0?'+':''}${ch.toFixed(2)}%</div></div>`;
+  document.getElementById('a-vrnk').textContent=`${compPct}th pct`;
+  document.getElementById('a-vm').textContent=vm;
+  document.getElementById('a-fm').textContent=fm;
+  document.getElementById('a-chg').innerHTML=$p(ch);
+  // Rank delta chip — '—' = no prior snapshot, '→' = no change, ↑/↓N = movement
+  const prevMr=prevARanks[f.id];
+  const drnkEl=document.getElementById('a-drnk');
+  if(prevMr==null){drnkEl.className='chip-v';drnkEl.textContent='—';}
+  else{const d=prevMr-compRank;drnkEl.className='chip-v '+(d>0?'g':d<0?'r':'');drnkEl.textContent=d>0?'↑'+d:d<0?'↓'+Math.abs(d):'→';}
+}
+
+function renderAlphaTable(){
+  const q=aQ.toLowerCase();
+  const nullDir=aSort.asc?Infinity:-Infinity;
+  const allSorted=[...aRows].sort((a,b)=>{
+    const av=a[aSort.c]??nullDir, bv=b[aSort.c]??nullDir;
+    return aSort.asc?av-bv:bv-av;
+  });
+  const rankMap={}; allSorted.forEach((c,i)=>{ rankMap[c.id]=i+1; });
+  const rows=allSorted.filter(c=>!q||c.symbol.toLowerCase().includes(q)||c.name.toLowerCase().includes(q));
+  document.getElementById('a-cnt').textContent=rows.length+'/'+aRows.length;
+  document.getElementById('tb-a').innerHTML=rows.map(c=>{
+    const isT=c.id===selA;
+    const pr=c.current_price||0;
+    const sym=c.symbol.toUpperCase();
+    const fdv=c.fully_diluted_valuation||c.market_cap||0;
+    const b=c.basis;
+    const basisCell=b!=null
+      ?`<span class="${b>0.1?'basis-pos':b<-0.1?'basis-neg':'basis-neu'}">${b>=0?'+':''}${b.toFixed(2)}%</span>`
+      :'<span class="basis-neu">—</span>';
+    return`<tr class="${isT?'hl':''}">
+      <td>${rankMap[c.id]}</td>
+      <td><div class="sc"><img src="${c.image}" onerror="this.style.display='none'"><div><div class="sn">${sym}${isT?' ★':''}</div><div class="sf">${c.name}</div></div></div></td>
+      <td>${$m(c.market_cap)}</td>
+      <td>${$m(fdv)}</td>
+      <td>${$m(c.total_volume)}</td>
+      <td>${$p(c.price_change_percentage_24h_in_currency)}</td>
+      <td>$${pr.toFixed(pr<0.01?6:4)}</td>
+      <td>${basisCell}</td>
+      <td>${c.perp_oi>0?$m(c.perp_oi):'<span class="na">—</span>'}</td>
+      <td>${c.perp_vol>0?$m(c.perp_vol):'<span class="na">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function setupAlphaTable(){
+  document.querySelectorAll('#tbl-a thead th[data-c]').forEach(th=>{
+    th.onclick=()=>{
+      const c=th.dataset.c;
+      if(aSort.c===c) aSort.asc=!aSort.asc; else{aSort.c=c;aSort.asc=false;}
+      document.querySelectorAll('#tbl-a thead th').forEach(t=>t.classList.remove('srt','asc'));
+      th.classList.add('srt'); if(aSort.asc) th.classList.add('asc');
+      renderAlphaTable();
+    };
+  });
+  document.getElementById('a-tf').oninput=e=>{ aQ=e.target.value; renderAlphaTable(); };
+}
+
+async function loadAlpha(){
+  aTs=Date.now(); // set immediately to prevent double-trigger
+  try{
+    const [alphaPages,spotTickers] = await Promise.all([
+      cgSeq([
+        '/coins/markets?vs_currency=usd&category=binance-alpha-spotlight&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h',
+        '/coins/markets?vs_currency=usd&category=binance-alpha-spotlight&order=market_cap_desc&per_page=250&page=2&sparkline=false&price_change_percentage=24h'
+      ], 800),
+      bs().catch(()=>[])
+    ]);
+    const p1=alphaPages[0]||[], p2=alphaPages[1]||[];
+
+    // Build spot trade count map: SYMBOL → count
+    const spotCountMap={};
+    if(Array.isArray(spotTickers)) spotTickers.forEach(t=>{
+      if(t.symbol.endsWith('USDT')) spotCountMap[t.symbol.slice(0,-4)]=parseInt(t.count||0);
+    });
+
+    aRows=[...(Array.isArray(p1)?p1:[]),...(Array.isArray(p2)?p2:[])];
+    if(!aRows.length) throw new Error('No alpha tokens returned — API key may be invalid or category changed');
+    aRows.forEach(c=>{ c.trades=spotCountMap[c.symbol.toUpperCase()]||0; });
+    if(!aRows.find(c=>c.id===selA)) selA=aRows[0]?.id||'folks';
+
+    // Compute and save composite ranks for 24h delta
+    const _mc=aRows.map(c=>c.market_cap||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const _vc=aRows.map(c=>c.total_volume||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const _fc=aRows.map(c=>c.fully_diluted_valuation||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const _newAR={}; const _cs=aRows.map(c=>({id:c.id,comp:(pctile(_mc,c.market_cap||0)+pctile(_vc,c.total_volume||0)+pctile(_fc,c.fully_diluted_valuation||0))/3}));
+    _cs.sort((a,b)=>b.comp-a.comp); _cs.forEach((c,i)=>{ _newAR[c.id]=i+1; });
+    snapSave('bi_alpha_snap',_newAR);
+
+    // Total 24h volume across all alpha tokens
+    const totalVol=aRows.reduce((s,c)=>s+(c.total_volume||0),0);
+    document.getElementById('a-tvol').textContent=txt($m(totalVol));
+    document.getElementById('a-tvol-s').textContent=aRows.length+' tokens combined';
+
+    computeAlphaBasis();
+    renderAlphaStats();
+
+    // Charts
+    const mc=aRows.map(c=>c.market_cap||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const vc=aRows.map(c=>c.total_volume||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const tc=aRows.map(c=>c.trades||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const f=aRows.find(c=>c.id===selA);
+    drawDist('ch-amc',mc,f?.market_cap||0,'#7c6af7');
+    drawDist('ch-avl',vc,f?.total_volume||0,'#22d3ee');
+    drawScatter('ch-asc',aRows,selA,'market_cap','total_volume');
+    drawDist('ch-atr',tc,f?.trades||0,'#a855f7','');
+
+    renderAlphaTable();
+    setupAlphaTable();
+
+    document.getElementById('a-spin').style.display='none';
+    document.getElementById('a-body').style.display='block';
+    document.getElementById('a-err').style.display='none';
+    evalAlerts();
+  }catch(e){
+    aTs=0;
+    document.getElementById('a-spin').style.display='none';
+    const er=document.getElementById('a-err'); er.style.display='block'; er.textContent='Alpha failed: '+e.message;
+    console.error(e);
+  }
+}
+
+// ── PERPS ────────────────────────────────────────
+function renderPerpsStats(){
+  const f=pRows.find(p=>p.symbol===selP); if(!f) return;
+  const ois=pRows.map(p=>p.oi).filter(v=>v>0).sort((a,b)=>a-b);
+  const pvs=pRows.map(p=>p.volume).filter(v=>v>0).sort((a,b)=>a-b);
+  const fds=pRows.map(p=>p.fdv).filter(v=>v>0).sort((a,b)=>a-b);
+  const oip=pctile(ois,f.oi), vp=pctile(pvs,f.volume), fp=pctile(fds,f.fdv);
+  const or2=pRows.filter(p=>p.oi>f.oi).length+1;
+  const vr=pRows.filter(p=>p.volume>f.volume).length+1;
+  const fr=pRows.filter(p=>(p.fdv||0)>(f.fdv||0)).length+1;
+  const ch=f.change24h||0;
+
+  // Composite rank: average of OI, Volume and FDV percentiles
+  const compScores=pRows.map(p=>({sym:p.symbol,comp:(pctile(ois,p.oi)+pctile(pvs,p.volume)+pctile(fds,p.fdv||0))/3}));
+  compScores.sort((a,b)=>b.comp-a.comp);
+  const compRank=compScores.findIndex(p=>p.sym===f.symbol)+1;
+  const compPct=Math.round(compScores.find(p=>p.sym===f.symbol)?.comp||0);
+
+  document.getElementById('p-oi-v').innerHTML=$m(f.oi);
+  document.getElementById('p-oi-s').textContent=`${oip}th pct · #${or2}/${pRows.length}`;
+  document.getElementById('p-oi-b').style.width=oip+'%';
+  setBadge('p-oi-z',oip);
+
+  document.getElementById('p-vl-v').innerHTML=$m(f.volume);
+  document.getElementById('p-vl-s').textContent=`${vp}th pct · #${vr}/${pRows.length}`;
+  document.getElementById('p-vl-b').style.width=vp+'%';
+  setBadge('p-vl-z',vp);
+
+  document.getElementById('p-fd-v').innerHTML=$m(f.fdv);
+  document.getElementById('p-fd-s').textContent=`${fp}th pct · #${fr}/${pRows.length}`;
+  document.getElementById('p-fd-b').style.width=fp+'%';
+  setBadge('p-fd-z',fp);
+
+  document.getElementById('p-pr').textContent='$'+f.price.toFixed(f.price<0.01?6:4);
+  const pc=document.getElementById('p-chg'); pc.innerHTML=$p(ch); pc.className='csub';
+  // Basis vs spot
+  const basisEl=document.getElementById('p-basis-info');
+  if(f.basis!=null){
+    const bCls=f.basis>0.1?'g':f.basis<-0.1?'r':'';
+    basisEl.innerHTML=`Basis: <span class="${bCls}">${f.basis>=0?'+':''}${f.basis.toFixed(3)}%</span> vs spot`;
+  } else { basisEl.textContent='Spot data unavailable'; }
+
+  p25row('p-p25-oi','OI',f.oi,ois);
+  p25row('p-p25-vl','Volume',f.volume,pvs);
+  p25row('p-p25-fd','FDV',f.fdv,fds,{rank:fr,n:pRows.length});
+
+  const voiR=f.oi>0?(f.volume/f.oi).toFixed(2):'—';
+  const fdmcR=f.market_cap>0&&f.fdv>0?(f.fdv/f.market_cap).toFixed(2)+'x':'—';
+  const pDil=f.fdv&&f.market_cap?(f.fdv/f.market_cap):1;
+  const voiRatio=f.oi>0?(f.volume/f.oi).toFixed(1):'—';
+  const pPctCls=compPct>=75?'ins-pct-high':compPct>=40?'ins-pct-mid':'ins-pct-low';
+  document.getElementById('p-ins-pct').className='ins-pct '+pPctCls;
+  document.getElementById('p-ins-pct').textContent=compPct+'th pct';
+  document.getElementById('p-oirnk').textContent='#'+compRank+'/'+pRows.length;
+  function pStatCls(p){return p>=75?'high':p>=40?'mid':'low';}
+  const pM=[{n:'OI',p:oip},{n:'Volume',p:vp},{n:'FDV',p:fp}];
+  const pBest=pM.reduce((a,b)=>b.p>a.p?b:a);
+  const pWorst=pM.reduce((a,b)=>b.p<a.p?b:a);
+  let pSummary=`${f.symbol} sits at the ${compPct}th percentile across Perps — strongest in ${pBest.n} (${pBest.p}th), weakest in ${pWorst.n} (${pWorst.p}th).`;
+  if(parseFloat(voiRatio)>5) pSummary+=` Vol/OI of ${voiRatio}x signals high speculative turnover.`;
+  else if(parseFloat(voiRatio)<0.5) pSummary+=` Low ${voiRatio}x Vol/OI — positions are sticky.`;
+  if(pDil>3) pSummary+=` High dilution at ${pDil.toFixed(1)}x — unlock pressure ahead.`;
+  if(compPct<25) pSummary+=' Bottom quartile — monitor for potential delisting.';
+  document.getElementById('p-ins-summary').textContent=pSummary;
+  document.getElementById('p-ins-grid').innerHTML=
+    `<div class="ins-stat"><div class="ins-stat-label">OI</div><div class="ins-stat-val ${pStatCls(oip)}">${oip}th</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">Volume</div><div class="ins-stat-val ${pStatCls(vp)}">${vp}th</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">FDV</div><div class="ins-stat-val ${pStatCls(fp)}">${fp}th</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">Vol/OI</div><div class="ins-stat-val mid">${voiRatio}x</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">Dilution</div><div class="ins-stat-val ${pDil>3?'low':pDil>1.5?'mid':'high'}">${pDil.toFixed(1)}x</div></div>`+
+    `<div class="ins-stat"><div class="ins-stat-label">24h</div><div class="ins-stat-val ${ch>=0?'high':'low'}">${ch>=0?'+':''}${ch.toFixed(2)}%</div></div>`;
+  document.getElementById('p-vrnk').textContent=`${compPct}th pct`;
+  document.getElementById('p-voi').textContent=voiR;
+  document.getElementById('p-fdmc').textContent=fdmcR;
+  document.getElementById('p-chg2').innerHTML=$p(ch);
+  // Composite rank delta chip — '—' = no prior snapshot, '→' = no change, ↑/↓N = movement
+  const prevOr=prevPRanks[f.symbol];
+  const pdrnk=document.getElementById('p-drnk');
+  if(prevOr==null){pdrnk.className='chip-v';pdrnk.textContent='—';}
+  else{const d=prevOr-compRank;pdrnk.className='chip-v '+(d>0?'g':d<0?'r':'');pdrnk.textContent=d>0?'↑'+d:d<0?'↓'+Math.abs(d):'→';}
+}
+
+function renderPerpsTable(){
+  const q=pQ.toLowerCase();
+  const nullDir=pSort.asc?Infinity:-Infinity;
+  const allSorted=[...pRows].sort((a,b)=>{const av=a[pSort.c]??nullDir,bv=b[pSort.c]??nullDir;return pSort.asc?av-bv:bv-av;});
+  const rankMap={}; allSorted.forEach((p,i)=>{ rankMap[p.symbol]=i+1; });
+  const rows=allSorted.filter(p=>!q||p.symbol.toLowerCase().includes(q)||p.name.toLowerCase().includes(q));
+  document.getElementById('p-cnt').textContent=rows.length+'/'+pRows.length;
+  document.getElementById('tb-p').innerHTML=rows.map(p=>{
+    const isT=p.symbol===selP;
+    const tradesStr=p.trades>0?(p.trades>=1e6?(p.trades/1e6).toFixed(1)+'M':p.trades>=1e3?(p.trades/1e3).toFixed(0)+'K':String(p.trades)):'<span class="na">—</span>';
+    const b=p.basis;
+    const basisCell=b!=null
+      ?`<span class="${b>0.1?'basis-pos':b<-0.1?'basis-neg':'basis-neu'}">${b>=0?'+':''}${b.toFixed(2)}%</span>`
+      :'<span class="basis-neu">—</span>';
+    return`<tr class="${isT?'hl':''}">
+      <td>${rankMap[p.symbol]}</td>
+      <td><div class="sc"><img src="${p.image}" onerror="this.style.display='none'" style="width:14px;height:14px;border-radius:50%"><div><div class="sn">${p.symbol}${isT?' ★':''}</div><div class="sf">${p.name}</div></div></div></td>
+      <td>${$m(p.oi)}</td>
+      <td>${$m(p.volume)}</td>
+      <td>${tradesStr}</td>
+      <td>${$m(p.fdv)}</td>
+      <td>${$m(p.market_cap)}</td>
+      <td>${$p(p.change24h)}</td>
+      <td>$${p.price.toFixed(p.price<0.01?6:4)}</td>
+      <td>${p.spot_vol>0?$m(p.spot_vol):'<span class="na">—</span>'}</td>
+      <td>${basisCell}</td>
+    </tr>`;
+  }).join('');
+}
+
+function setupPerpsTable(){
+  document.querySelectorAll('#tbl-p thead th[data-c]').forEach(th=>{
+    th.onclick=()=>{
+      const c=th.dataset.c;
+      if(pSort.c===c) pSort.asc=!pSort.asc; else{pSort.c=c;pSort.asc=false;}
+      document.querySelectorAll('#tbl-p thead th').forEach(t=>t.classList.remove('srt','asc'));
+      th.classList.add('srt'); if(pSort.asc) th.classList.add('asc');
+      renderPerpsTable();
+    };
+  });
+  document.getElementById('p-tf').oninput=e=>{ pQ=e.target.value; renderPerpsTable(); };
+}
+
+async function loadPerps(){
+  pTs=Date.now();
+  try{
+    const spotFetch = bs().catch(()=>[]);
+    const [futures,spotPrices] = await Promise.all([
+      bf('/ticker/24hr'), spotFetch
+    ]);
+    spotMap={}; const spotVolMap={};
+    if(Array.isArray(spotPrices)) spotPrices.forEach(t=>{
+      spotMap[t.symbol]=parseFloat(t.lastPrice||t.price||0);
+      spotVolMap[t.symbol]=parseFloat(t.quoteVolume||0);
+    });
+
+    const usdt = futures.filter(t=>t.symbol.endsWith('USDT')&&parseFloat(t.quoteVolume)>1000);
+
+    // Fetch top 1000 coins by market cap (4 pages × 250). Server caches for 5 min.
+    const oiPromise = fetchOpenInterestBatch(usdt.map(t=>t.symbol));
+    const cgTopPages = await cgSeq([
+      '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h',
+      '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2&sparkline=false&price_change_percentage=24h',
+      '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=3&sparkline=false&price_change_percentage=24h',
+      '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=4&sparkline=false&price_change_percentage=24h'
+    ]);
+    const oiPack = await oiPromise;
+    const oiBySym = oiPack.openInterestBySymbol || {};
+
+    // Build symbol → best (highest mcap) coin map from top 1000
+    const symToCoin = {};
+    for(const page of cgTopPages){
+      if(!Array.isArray(page)) continue;
+      for(const c of page){
+        const s = (c.symbol||'').toUpperCase().replace(/^\$/,'');
+        if(!s) continue;
+        // First match wins (since we fetched in mcap-desc order)
+        if(!symToCoin[s]) symToCoin[s]=c;
+      }
+    }
+    console.log(`CG top coins resolved: ${Object.keys(symToCoin).length} symbols from ${cgTopPages.reduce((s,p)=>s+(Array.isArray(p)?p.length:0),0)} coins`);
+
+    // Manual symbol→symbol map for known Binance ↔ CG mismatches
+    const MANUAL_CG = {
+      'NEIROETH':'NEIRO','BEAMX':'BEAM','LUNA2':'LUNA','RAYSOL':'RAY',
+      'VELODROME':'VELO','DODOX':'DODO','BROCCOLI714':'BROCCOLI',
+      'BROCCOLIF3B':'BROCCOLI','RONIN':'RON','1MBABYDOGE':'BABYDOGE'
+    };
+    function resolvePerp(base){
+      const variants = [base, base.replace(/^1000000/,''), base.replace(/^1000/,''), MANUAL_CG[base]].filter(Boolean);
+      for(const v of variants){
+        if(symToCoin[v]) return symToCoin[v];
+      }
+      return {};
+    }
+
+
+    const rawRows = usdt.map(t=>{
+      const base=t.symbol.replace('USDT','');
+      const cgi = resolvePerp(base);
+      const price=parseFloat(t.lastPrice);
+      const oiQty = Number(oiBySym[t.symbol.toUpperCase()] ?? 0);
+      const mc=cgi.market_cap||0;
+      const fdv=cgi.fully_diluted_valuation||mc||0;
+      const sbase=base.replace(/^1000/,'');
+      const svol=spotVolMap[base+'USDT']||spotVolMap[sbase+'USDT']||0;
+      return{symbol:base,name:cgi.name||base,image:cgi.image||'',price,
+        market_cap:mc, fdv,
+        volume:parseFloat(t.quoteVolume),
+        oi:oiQty*price,
+        trades:parseInt(t.count||0),
+        change24h:parseFloat(t.priceChangePercent),
+        spot_vol:svol};
+    }).filter(p=>p.oi>0);
+
+    pRows = rawRows;
+    if(!pRows.find(p=>p.symbol===selP)) selP=pRows[0]?.symbol||'BTC';
+
+    // Compute basis for perps (needs spotMap which is now built)
+    computePerpsBasis();
+
+    // Compute and save composite ranks for 24h delta
+    const _oi=pRows.map(p=>p.oi).filter(v=>v>0).sort((a,b)=>a-b);
+    const _pv=pRows.map(p=>p.volume).filter(v=>v>0).sort((a,b)=>a-b);
+    const _fd=pRows.map(p=>p.fdv||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const _newPR={}; const _pcs=pRows.map(p=>({sym:p.symbol,comp:(pctile(_oi,p.oi)+pctile(_pv,p.volume)+pctile(_fd,p.fdv||0))/3}));
+    _pcs.sort((a,b)=>b.comp-a.comp); _pcs.forEach((p,i)=>{ _newPR[p.sym]=i+1; });
+    snapSave('bi_perps_snap',_newPR);
+
+    renderPerpsStats();
+    renderPerpsTable();
+    setupPerpsTable();
+
+    // Cross-update alpha table now that pRows has perp prices for basis
+    if(aRows.length){ computeAlphaBasis(); renderAlphaTable(); }
+
+    // Perps charts
+    const oisAll=pRows.map(p=>p.oi).filter(v=>v>0).sort((a,b)=>a-b);
+    const trdAll=pRows.map(p=>p.trades||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const pf=pRows.find(p=>p.symbol===selP);
+    drawDist('ch-poi',oisAll,pf?.oi||0,'#f0a500');
+    drawScatter('ch-psc',pRows.map(p=>({...p,id:p.symbol,market_cap:p.oi,total_volume:p.volume})),selP,'market_cap','total_volume');
+    drawDist('ch-ptr',trdAll,pf?.trades||0,'#a855f7','');
+
+    document.getElementById('p-spin').style.display='none';
+    document.getElementById('p-body').style.display='block';
+    document.getElementById('p-err').style.display='none';
+    evalAlerts();
+  }catch(e){
+    pTs=0;
+    document.getElementById('p-spin').style.display='none';
+    const er=document.getElementById('p-err'); er.style.display='block'; er.textContent='Perps failed: '+e.message;
+    console.error(e);
+  }
+}
+
+// ── ALERTS SYSTEM ────────────────────────────────
+// Stored in localStorage: {alerts:[{id,metric,cond,val,fired}], tgToken, tgChat}
+function loadAlertConfig(){
+  try{ return JSON.parse(localStorage.getItem('lc_alerts')||'{}'); }catch(e){ return {}; }
+}
+function saveAlertConfig(cfg){ try{localStorage.setItem('lc_alerts',JSON.stringify(cfg));}catch(e){} }
+
+function openAlerts(){
+  const cfg=loadAlertConfig();
+  document.getElementById('tg-token').value=cfg.tgToken||'';
+  document.getElementById('tg-chat').value=cfg.tgChat||'';
+  updateTgStatus(cfg);
+  renderAlertList();
+  document.getElementById('alert-modal').classList.add('open');
+}
+function closeAlerts(){
+  // Save TG config on close
+  const cfg=loadAlertConfig();
+  cfg.tgToken=document.getElementById('tg-token').value.trim();
+  cfg.tgChat=document.getElementById('tg-chat').value.trim();
+  saveAlertConfig(cfg);
+  document.getElementById('alert-modal').classList.remove('open');
+}
+function updateTgStatus(cfg){
+  const el=document.getElementById('tg-status');
+  if(cfg.tgToken&&cfg.tgChat){el.className='tg-status tg-on';el.textContent='Connected';}
+  else{el.className='tg-status tg-off';el.textContent='Not connected';}
+}
+function updateAlertCount(){
+  const cfg=loadAlertConfig();
+  const n=(cfg.alerts||[]).length;
+  const el=document.getElementById('alert-cnt');
+  if(n>0){el.style.display='inline-flex';el.textContent=n;}else{el.style.display='none';}
+}
+function addAlert(){
+  const metric=document.getElementById('al-metric').value;
+  const cond=document.getElementById('al-cond').value;
+  const val=parseFloat(document.getElementById('al-val').value);
+  if(isNaN(val)) return;
+  const cfg=loadAlertConfig();
+  if(!cfg.alerts) cfg.alerts=[];
+  cfg.alerts.push({id:Date.now(),metric,cond,val,fired:false});
+  saveAlertConfig(cfg);
+  document.getElementById('al-val').value='';
+  renderAlertList();
+  updateAlertCount();
+}
+function removeAlert(id){
+  const cfg=loadAlertConfig();
+  cfg.alerts=(cfg.alerts||[]).filter(a=>a.id!==id);
+  saveAlertConfig(cfg);
+  renderAlertList();
+  updateAlertCount();
+}
+function renderAlertList(){
+  const cfg=loadAlertConfig();
+  const list=cfg.alerts||[];
+  const el=document.getElementById('alert-list');
+  if(!list.length){el.innerHTML='<div style="color:var(--txt4);font-size:10px;padding:8px 0">No alerts configured</div>';return;}
+  const mn={price:'Price',market_cap:'MCap',total_volume:'Volume',fdv:'FDV',oi:'OI',change24h:'24h%',comp_pct:'Comp %ile',comp_rank:'Comp Rank'};
+  el.innerHTML=list.map(a=>{
+    const condTxt=a.cond==='gt'?'>':'<';
+    const fv=a.metric==='change24h'?a.val+'%':a.metric==='comp_pct'?a.val+'th':a.metric==='comp_rank'?'#'+a.val:'$'+fk(a.val);
+    return`<div class="alert-item">
+      <span class="alert-rule">${mn[a.metric]||a.metric} ${condTxt} ${fv}</span>
+      <button class="mbtn mbtn-danger" style="padding:2px 8px;font-size:9px" onclick="removeAlert(${a.id})">Remove</button>
+    </div>`;
+  }).join('');
+}
+
+async function sendTelegram(text){
+  const cfg=loadAlertConfig();
+  if(!cfg.tgToken||!cfg.tgChat) return;
+  try{
+    await fetch('/api/telegram',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({token:cfg.tgToken,chatId:cfg.tgChat,text})
+    });
+  }catch(e){ console.warn('Telegram send failed',e); }
+}
+
+async function testTelegram(){
+  const cfg=loadAlertConfig();
+  cfg.tgToken=document.getElementById('tg-token').value.trim();
+  cfg.tgChat=document.getElementById('tg-chat').value.trim();
+  saveAlertConfig(cfg);
+  updateTgStatus(cfg);
+  if(!cfg.tgToken||!cfg.tgChat){ alert('Enter both Bot Token and Chat ID'); return; }
+  try{
+    const r=await fetch('/api/telegram',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({token:cfg.tgToken,chatId:cfg.tgChat,text:'ListingCore alert test — connection working.'})
+    });
+    const d=await r.json();
+    if(d.ok) alert('Message sent!');
+    else alert('Failed: '+(d.error||'unknown'));
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+// Evaluate alerts against current selected token data
+function evalAlerts(){
+  const cfg=loadAlertConfig();
+  if(!cfg.alerts||!cfg.alerts.length) return;
+  const af=aRows.find(c=>c.id===selA);
+  const pf=pRows.find(p=>p.symbol===selP);
+  // Compute composite %ile and rank for alpha (MCap + Vol + FDV)
+  let aCompPct=0, aCompRank=0;
+  if(af&&aRows.length){
+    const mc=aRows.map(c=>c.market_cap||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const vc=aRows.map(c=>c.total_volume||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const fc=aRows.map(c=>c.fully_diluted_valuation||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const scores=aRows.map(c=>({id:c.id,comp:(pctile(mc,c.market_cap||0)+pctile(vc,c.total_volume||0)+pctile(fc,c.fully_diluted_valuation||0))/3}));
+    scores.sort((a,b)=>b.comp-a.comp);
+    aCompRank=scores.findIndex(c=>c.id===af.id)+1;
+    aCompPct=Math.round(scores.find(c=>c.id===af.id)?.comp||0);
+  }
+  // Compute composite for perps (OI + Vol + FDV)
+  let pCompPct=0, pCompRank=0;
+  if(pf&&pRows.length){
+    const ois=pRows.map(p=>p.oi).filter(v=>v>0).sort((a,b)=>a-b);
+    const pvs=pRows.map(p=>p.volume).filter(v=>v>0).sort((a,b)=>a-b);
+    const fds=pRows.map(p=>p.fdv||0).filter(v=>v>0).sort((a,b)=>a-b);
+    const scores=pRows.map(p=>({sym:p.symbol,comp:(pctile(ois,p.oi)+pctile(pvs,p.volume)+pctile(fds,p.fdv||0))/3}));
+    scores.sort((a,b)=>b.comp-a.comp);
+    pCompRank=scores.findIndex(p=>p.sym===pf.symbol)+1;
+    pCompPct=Math.round(scores.find(p=>p.sym===pf.symbol)?.comp||0);
+  }
+  const vals={
+    price: af?.current_price || pf?.price || 0,
+    market_cap: af?.market_cap || pf?.market_cap || 0,
+    total_volume: af?.total_volume || pf?.volume || 0,
+    fdv: af?.fully_diluted_valuation || pf?.fdv || 0,
+    oi: pf?.oi || af?.perp_oi || 0,
+    change24h: af?.price_change_percentage_24h_in_currency || pf?.change24h || 0,
+    comp_pct: aCompPct || pCompPct,
+    comp_rank: aCompRank || pCompRank
+  };
+  const metricNames={price:'Price',market_cap:'MCap',total_volume:'Volume',fdv:'FDV',oi:'OI',change24h:'24h%',comp_pct:'Composite %ile',comp_rank:'Composite Rank'};
+  const fmtVal=(m,v)=>{
+    if(m==='change24h') return v.toFixed(2)+'%';
+    if(m==='comp_pct') return v+'th pct';
+    if(m==='comp_rank') return '#'+v;
+    return '$'+fk(v);
+  };
+  let changed=false;
+  for(const a of cfg.alerts){
+    const v=vals[a.metric]||0;
+    const triggered = a.cond==='gt' ? v>a.val : v<a.val;
+    if(triggered && !a.fired){
+      a.fired=true; changed=true;
+      const sym=(af?.symbol||pf?.symbol||selA).toUpperCase();
+      const condTxt=a.cond==='gt'?'above':'below';
+      const msg=`ListingCore Alert: ${sym} ${metricNames[a.metric]} is ${condTxt} ${fmtVal(a.metric,a.val)} (current: ${fmtVal(a.metric,v)})`;
+      sendTelegram(msg);
+    } else if(!triggered && a.fired){
+      a.fired=false; changed=true;
+    }
+  }
+  if(changed) saveAlertConfig(cfg);
+}
+
+updateAlertCount();
+
+// Boot
+loadAlpha();
+loadPerps();
+startTicker();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "functions": {
+    "api/proxy.js": {
+      "regions": ["fra1"]
+    },
+    "api/batch-open-interest.js": {
+      "regions": ["fra1"]
+    },
+    "api/telegram.js": {
+      "regions": ["fra1"]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/folks-analysis.html"
+    }
+  ]
+}
